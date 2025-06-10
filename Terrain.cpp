@@ -27,16 +27,37 @@ HRESULT CTerrain::InitData()//(TSTRING colorName)
 		//加载颜色图片
 		D3DXCreateTextureFromFileA(m_pDev, colorName.c_str(), &m_pTexColor);
 	}
+
+	pElem = m_pRootElem->FirstChildElement("HeightTex");
+	if (pElem)
+	{
+		string heightName = pElem->GetText();
+		//加载高度图片
+		D3DXCreateTextureFromFileA(m_pDev, heightName.c_str(), &m_pTexHeight);
+
+		D3DLOCKED_RECT locked;
+		m_pTexHeight->LockRect(0, &locked, 0, 0);
+		m_pTexHeight->UnlockRect(0);
+
+		m_pColorData = (DWORD*)locked.pBits; //获取高度图片的颜色数据
+
+		D3DSURFACE_DESC desc;
+		m_pTexHeight->GetLevelDesc(0, &desc);
+
+		m_iWidth = desc.Width;	//获取高度图片的宽度
+		m_iHeight = desc.Height; //获取高度图片的高度
+	}
+
 	pElem = m_pRootElem->FirstChildElement("Size");
 	if (pElem)
 	{
-		string str = pElem->Attribute("width");
+		/*string str = pElem->Attribute("width");
 		m_iWidth=atof(str.c_str());
 
 		str = pElem->Attribute("height");
-		m_iHeight = atof(str.c_str());
+		m_iHeight = atof(str.c_str());*/
 
-		str = pElem->Attribute("Len");
+		string str = pElem->Attribute("Len");
 		m_fLen = atof(str.c_str());
 	}
 	
@@ -65,7 +86,8 @@ HRESULT CTerrain::InitData()//(TSTRING colorName)
 		{
 			m_pTerrainVertex[j + i * m_iWidth].pos = D3DXVECTOR3(j * m_fLen, 0.0f, i * m_fLen);
 
-			
+			m_pTerrainVertex[j + i * m_iWidth].pos.y =(*(m_pColorData + i * m_iWidth + j)&0xff)/5.0f;//高度值
+
 			m_pTerrainVertex[j + i * m_iWidth].color = 0xffffffff;
 			
 			//保证图片的纹理是0~1的范围

@@ -37,7 +37,9 @@ private:
 	WORD m_iHeight;
 	
 	LPDIRECT3DTEXTURE9 m_pTexColor;	//保持地形颜色值的图片
+	LPDIRECT3DTEXTURE9 m_pTexHeight;	//保持地形高度值的图片
 	
+	DWORD* m_pColorData;	//地形高度值的颜色数据
 	//模型方法绘制地形
 	LPD3DXMESH		m_pTerrainMesh;
 	D3DXMATRIX matWorld;
