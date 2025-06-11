@@ -25,6 +25,8 @@ private:
 	CAxisAlignedBox* m_pAABB; //AABB°üÎ§ºÐ
 	CAxisAlignedBox* m_pSelfBox;
 
+	DECLARE_MEMBER(bool,m_bisCulled,IsCulled)
+
 	
 };
 

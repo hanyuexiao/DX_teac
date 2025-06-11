@@ -37,6 +37,8 @@ private:
 	void RenderAllMeshes();
 
 	void RenderTerrain();
-	
+
+	//检测模型是否在视锥体内
+	bool IsInFrustum();
 };
 

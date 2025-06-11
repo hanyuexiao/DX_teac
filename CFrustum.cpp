@@ -1,5 +1,61 @@
 #include "CFrustum.h"
 
+void CFrustum::MakeFrustumPlanes()
+{
+	//计算视锥体的3个平面
+	//前平面
+	D3DXPlaneFromPoints(&m_Planes[0], &m_FrustumVertexsInWorld[5], &m_FrustumVertexsInWorld[4], &m_FrustumVertexsInWorld[6]);
+	//左平面
+	D3DXPlaneFromPoints(&m_Planes[1], &m_FrustumVertexsInWorld[1], &m_FrustumVertexsInWorld[5], &m_FrustumVertexsInWorld[7]);
+	//右平面
+	D3DXPlaneFromPoints(&m_Planes[2], &m_FrustumVertexsInWorld[4], &m_FrustumVertexsInWorld[0], &m_FrustumVertexsInWorld[2]);
+}
+
+bool CFrustum::PointInFrustum(const D3DXVECTOR3& point)
+{
+	for (int i = 0; i < 3; i++)
+	{
+		//计算点到平面的距离
+		float distance = D3DXPlaneDotCoord(&m_Planes[i], &point);
+		if (distance > 10)
+		{
+			return false;
+		}
+		return true; // 点在视锥体内
+	}
+}
+
+bool CFrustum::BoxInFrustum(const D3DXVECTOR3* arrayCorner) {
+	for (int i = 0; i < 8; i++)
+	{
+		bool bInFrustum = true;
+		for (int j = 0; j < 3; j++)
+		{
+			float distance = D3DXPlaneDotCoord(&m_Planes[j], &arrayCorner[i]);
+			if (distance < 10)
+			{
+				bInFrustum = false;
+				break;
+			}
+		}
+		if (bInFrustum)
+			return true; // 有一个点不在视锥体内
+	}
+	return false; // 所有点都在视锥体内
+}
+
+bool CFrustum::SphereInFrustum(const D3DXVECTOR3& center, float radius)
+{
+	for (int i = 0; i < 3; i++)
+	{
+		float distance = D3DXPlaneDotCoord(&m_Planes[i], &center);
+		if (distance > radius + 10)
+		{
+			return true; // 球不在视锥体内
+		}
+	}
+	return false; // 球在视锥体内
+}
 void CFrustum::InitData()
 {
 	//先计算一个初始相机位置的视锥坐标
@@ -85,6 +141,10 @@ void CFrustum::UpdateFrustum(D3DXMATRIX* View/*=nullptr*/)
 	m_pArrayFrustumVertex[23] = { m_FrustumVertexsInWorld[6],0x880000ff };
 
 	m_pFrustumMesh->UnlockVertexBuffer();
+
+
+	//构建裁剪的3个平面
+	MakeFrustumPlanes();
 }
 
 void CFrustum::DrawFrustum()

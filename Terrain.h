@@ -1,12 +1,13 @@
 #pragma once
 #include "myHead.h"
 #include "Object.h"
-#define D3DFVF_TERRIANVERTEXFORAMT  D3DFVF_XYZ |D3DFVF_DIFFUSE | D3DFVF_TEX1
+#define D3DFVF_TERRIANVERTEXFORAMT  D3DFVF_XYZ |D3DFVF_DIFFUSE | D3DFVF_TEX2
 struct TerrainVERTEX
 {
 	D3DXVECTOR3 pos;
 	DWORD color;//0xffff0000
 	D3DXVECTOR2 texpos1;//纹理坐标1
+	D3DXVECTOR2 texpos2;//纹理坐标2
 };
 
 
@@ -36,7 +37,8 @@ private:
 	WORD m_iWidth;
 	WORD m_iHeight;
 	
-	LPDIRECT3DTEXTURE9 m_pTexColor;	//保持地形颜色值的图片
+	LPDIRECT3DTEXTURE9 m_pTexColor1;	//保持地形颜色值的图片
+	LPDIRECT3DTEXTURE9 m_pTexColor2;	//保持地形颜色值的图片
 	LPDIRECT3DTEXTURE9 m_pTexHeight;	//保持地形高度值的图片
 	
 	DWORD* m_pColorData;	//地形高度值的颜色数据

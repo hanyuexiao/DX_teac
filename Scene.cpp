@@ -75,6 +75,11 @@ HRESULT CScene::LoadStaticMeshFile(TSTRING name){
 		{
 			break;
 		}
+
+		D3DXVECTOR3 vPos = pMesh->GetNode()->GetWorldPos();
+		vPos.y = m_pTerrain->GetHeight(vPos.x, vPos.z);
+
+		pMesh->GetNode()->SetRelativePosition(vPos);
 		m_vecMesh.push_back(pMesh);
 	}
 	return S_OK;
@@ -148,4 +153,26 @@ void CScene::RenderTerrain()
 	if (m_pTerrain)
 		m_pTerrain->Render();
 	
+}
+
+bool CScene::IsInFrustum()
+{
+	if (m_pFrustum)
+	{
+		for (CStaticMesh* pMesh : m_vecMesh)
+		{
+			if (pMesh && pMesh->GetBoundInfo()
+			{
+				if (!m_pFrustum->BoxInFrustum(pMesh->GetAABB()->GetCornerArray()))
+				{
+					pMesh->SetIsCulled(true);
+				}
+				else
+				{
+					pMesh->SetIsCulled(false);
+				}
+			}
+		}
+		return true;
+	}
 }

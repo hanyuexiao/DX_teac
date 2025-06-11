@@ -20,12 +20,21 @@ HRESULT CTerrain::InitData()//(TSTRING colorName)
 	this->m_strObjectName = _T("myTerrain");
 	m_pDev = CGraphic::GetSingleObjPtr()->m_pDevice;
 	//解析脚本数据
-	TiXmlElement* pElem=m_pRootElem->FirstChildElement("ColorTex");
+
+	TiXmlElement* pElem=m_pRootElem->FirstChildElement("ColorTex1");
 	if(pElem)
 	{
 		string colorName=pElem->GetText();	
 		//加载颜色图片
-		D3DXCreateTextureFromFileA(m_pDev, colorName.c_str(), &m_pTexColor);
+		D3DXCreateTextureFromFileA(m_pDev, colorName.c_str(), &m_pTexColor1);
+	}
+
+	TiXmlElement* pElem = m_pRootElem->FirstChildElement("ColorTex2");
+	if (pElem)
+	{
+		string colorName = pElem->GetText();
+		//加载颜色图片
+		D3DXCreateTextureFromFileA(m_pDev, colorName.c_str(), &m_pTexColor2);
 	}
 
 	pElem = m_pRootElem->FirstChildElement("HeightTex");
@@ -86,15 +95,20 @@ HRESULT CTerrain::InitData()//(TSTRING colorName)
 		{
 			m_pTerrainVertex[j + i * m_iWidth].pos = D3DXVECTOR3(j * m_fLen, 0.0f, i * m_fLen);
 
-			m_pTerrainVertex[j + i * m_iWidth].pos.y =(*(m_pColorData + i * m_iWidth + j)&0xff)/5.0f;//高度值
+			m_pTerrainVertex[j + i * m_iWidth].pos.y =(*(m_pColorData + (m_iHeight - i) * m_iWidth + j)&0xff)/5.0f;//高度值
 
-			m_pTerrainVertex[j + i * m_iWidth].color = 0xffffffff;
+			//m_pTerrainVertex[j + i * m_iWidth].pos.y = 0.0f; //高度值
+			if (m_pTerrainVertex[j + i * m_iWidth].pos.y >50)
+				m_pTerrainVertex[j + i * m_iWidth].color = 0x00ffffff;
+			else
+				m_pTerrainVertex[j + i * m_iWidth].color = 0xffffffff;
 			
 			//保证图片的纹理是0~1的范围
 			m_pTerrainVertex[j + i * m_iWidth].texpos1.x = 10.0f * i / (m_iHeight - 1);
 			m_pTerrainVertex[j + i * m_iWidth].texpos1.y = 10.0f * j / (m_iWidth - 1);
 
-
+			m_pTerrainVertex[j + i * m_iWidth].texpos2.x = 5.0f * i / (m_iHeight - 1);
+			m_pTerrainVertex[j + i * m_iWidth].texpos2.y = 5.0f * j / (m_iWidth - 1);
 		}
 	}
 	m_pTerrainMesh->UnlockVertexBuffer();
@@ -156,15 +170,22 @@ void CTerrain::Render()
 	//先定义材质，再设置纹理混合
 
 	
-	m_pDev->SetTexture(0, m_pTexColor);
+	m_pDev->SetTexture(0, m_pTexColor1);
 	
 	m_pDev->SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_MODULATE);
 	m_pDev->SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_TEXTURE);
 	m_pDev->SetTextureStageState(0, D3DTSS_COLORARG2, D3DTA_DIFFUSE);
 
 
+	m_pDev->SetTexture(1, m_pTexColor2);
+
+	m_pDev->SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_MODULATE);
+	m_pDev->SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_TEXTURE);
+	m_pDev->SetTextureStageState(0, D3DTSS_COLORARG2, D3DTA_CURRENT);
+
 	m_pTerrainMesh->DrawSubset(0);
 
+	m_pDev->SetTextureStageState(1, D3DTSS_COLOROP, D3DTOP_DISABLE);
 }
 
 
@@ -176,6 +197,8 @@ float CTerrain::GetHeight(float x, float z)
 	{
 		return 9999.f;
 	}
+
+	//将连续的点转为离散的个个顶点，定位当前点所在区域的左顶点--》方便对其他顶点进行计算，都是进行+1操作
 	float fXTileIndex = x / m_fLen;//列号float
 	float fZTileIndex = z / m_fLen;//行号float
 	UINT uiXTileIndex = static_cast<UINT>(fXTileIndex);//列号转int
@@ -187,12 +210,16 @@ float CTerrain::GetHeight(float x, float z)
 	|   \ |
 	0-----2
 	*/
-	D3DXVECTOR3 point0 = m_pTerrainVertex[uiZTileIndex * m_iWidth + uiXTileIndex].pos;
-	D3DXVECTOR3 point1 = m_pTerrainVertex[(uiZTileIndex + 1) * m_iWidth + uiXTileIndex].pos;
-	D3DXVECTOR3 point2 = m_pTerrainVertex[uiZTileIndex * m_iWidth + uiXTileIndex + 1].pos;
-	D3DXVECTOR3 point3 = m_pTerrainVertex[(uiZTileIndex + 1) * m_iWidth + uiXTileIndex + 1].pos;
+
+
+	D3DXVECTOR3 point0 = m_pTerrainVertex[uiZTileIndex * m_iWidth + uiXTileIndex].pos;   ////左上角点
+	D3DXVECTOR3 point1 = m_pTerrainVertex[(uiZTileIndex + 1) * m_iWidth + uiXTileIndex].pos;  ////左下角点
+	D3DXVECTOR3 point2 = m_pTerrainVertex[uiZTileIndex * m_iWidth + uiXTileIndex + 1].pos;   /////右上角点
+	D3DXVECTOR3 point3 = m_pTerrainVertex[(uiZTileIndex + 1) * m_iWidth + uiXTileIndex + 1].pos; ////右下角点
+
 	float x_pct = fXTileIndex - uiXTileIndex;//x偏移系数（0~1）
 	float z_pct = fZTileIndex - uiZTileIndex;//z偏移系数（0~1）
+
 	D3DXVECTOR3 restutPoint;
 	//下三角（0号点为基准）
 	if (x_pct + z_pct <= 1) {

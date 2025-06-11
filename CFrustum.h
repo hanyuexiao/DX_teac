@@ -31,6 +31,22 @@ class CFrustum
 
 	FRUSTUMVERTEX* m_pArrayFrustumVertex;
 	WORD * m_arrayFrustumIndex;
+
+	//定义视锥体裁剪时的3个平面
+	D3DXPLANE m_Planes[3];
+
+	//计算视锥体的3个平面
+	void MakeFrustumPlanes();
+
+	//计算点到面的距离，判断点是否在视锥体内
+	bool PointInFrustum(const D3DXVECTOR3& point);
+
+	//计算包围盒是否在视锥体内
+	bool BoxInFrustum(const D3DXVECTOR3* arrayCorner);
+
+	//计算球是否在视锥体内
+	bool SphereInFrustum(const D3DXVECTOR3& center, float radius);
+
 	public:
 		void InitData();//创建视锥模型，填充顶点和索引数据
 		void UpdateFrustum(D3DXMATRIX* View=nullptr);//传一个按键时刻的相机矩阵，需要更新模型的顶点数据
