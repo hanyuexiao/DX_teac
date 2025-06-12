@@ -56,6 +56,7 @@ bool CFrustum::SphereInFrustum(const D3DXVECTOR3& center, float radius)
 	}
 	return false; // 球在视锥体内
 }
+
 void CFrustum::InitData()
 {
 	//先计算一个初始相机位置的视锥坐标

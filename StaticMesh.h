@@ -14,6 +14,7 @@ public:
 	~CStaticMesh();
 	HRESULT InitObject(TiXmlElement* root){m_pRootElem=root;return S_OK;}
 	HRESULT InitData();
+	CAxisAlignedBox* GetBoundInfo() { return m_pSelfBox; }
 	void Render() ;
 
 private:
@@ -23,9 +24,10 @@ private:
 	CModelData* m_pModelData;
 
 	CAxisAlignedBox* m_pAABB; //AABB°üÎ§ºÐ
+
 	CAxisAlignedBox* m_pSelfBox;
 
-	DECLARE_MEMBER(bool,m_bisCulled,IsCulled)
+	DECLARE_MEMBER(bool, m_bIsCulled, IsCulled);
 
 	
 };

@@ -29,7 +29,7 @@ HRESULT CTerrain::InitData()//(TSTRING colorName)
 		D3DXCreateTextureFromFileA(m_pDev, colorName.c_str(), &m_pTexColor1);
 	}
 
-	TiXmlElement* pElem = m_pRootElem->FirstChildElement("ColorTex2");
+	pElem = m_pRootElem->FirstChildElement("ColorTex2");
 	if (pElem)
 	{
 		string colorName = pElem->GetText();
@@ -95,7 +95,7 @@ HRESULT CTerrain::InitData()//(TSTRING colorName)
 		{
 			m_pTerrainVertex[j + i * m_iWidth].pos = D3DXVECTOR3(j * m_fLen, 0.0f, i * m_fLen);
 
-			m_pTerrainVertex[j + i * m_iWidth].pos.y =(*(m_pColorData + (m_iHeight - i) * m_iWidth + j)&0xff)/5.0f;//高度值
+			m_pTerrainVertex[j + i * m_iWidth].pos.y =(*(m_pColorData + (m_iHeight - i) * m_iWidth + j)&0xff)/2.0f;//高度值
 
 			//m_pTerrainVertex[j + i * m_iWidth].pos.y = 0.0f; //高度值
 			if (m_pTerrainVertex[j + i * m_iWidth].pos.y >50)
@@ -172,16 +172,18 @@ void CTerrain::Render()
 	
 	m_pDev->SetTexture(0, m_pTexColor1);
 	
+	//设置纹理阶段状态
+	m_pDev->SetTextureStageState(0, D3DTSS_TEXCOORDINDEX, 0); //纹理坐标索引
 	m_pDev->SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_MODULATE);
 	m_pDev->SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_TEXTURE);
 	m_pDev->SetTextureStageState(0, D3DTSS_COLORARG2, D3DTA_DIFFUSE);
 
 
 	m_pDev->SetTexture(1, m_pTexColor2);
-
-	m_pDev->SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_MODULATE);
-	m_pDev->SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_TEXTURE);
-	m_pDev->SetTextureStageState(0, D3DTSS_COLORARG2, D3DTA_CURRENT);
+	m_pDev->SetTextureStageState(1, D3DTSS_TEXCOORDINDEX, 1); //纹理坐标索引
+	m_pDev->SetTextureStageState(1, D3DTSS_COLOROP, D3DTOP_BLENDDIFFUSEALPHA);
+	m_pDev->SetTextureStageState(1, D3DTSS_COLORARG1, D3DTA_TEXTURE);
+	m_pDev->SetTextureStageState(1, D3DTSS_COLORARG2, D3DTA_CURRENT);
 
 	m_pTerrainMesh->DrawSubset(0);
 

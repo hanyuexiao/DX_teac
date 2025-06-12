@@ -62,6 +62,9 @@ public:
 	void SetExtents(
 		float mx, float my, float mz,
 		float Mx, float My, float Mz );
+	const D3DXVECTOR3* GetAllCornersBox(void) const;
+	
+	
 
 	/** 返回盒子的8个顶点，用来计算和非轴对齐盒子的碰撞。
 	@remarks

@@ -129,6 +129,11 @@ const D3DXVECTOR3* CAxisAlignedBox::GetAllCorners(void) const
 	return (const D3DXVECTOR3*)mCorners;
 }
 
+const D3DXVECTOR3* CAxisAlignedBox::GetAllCornersBox(void) const
+{
+	return (const D3DXVECTOR3*)mCornersWorld;
+}
+
 void makeFloor( D3DXVECTOR3& src, const D3DXVECTOR3& cmp )
 {
 	if( cmp.x < src.x ) src.x = cmp.x;

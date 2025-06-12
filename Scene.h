@@ -1,5 +1,6 @@
 #pragma once
 #include "myHead.h"
+#include "Player.h"
 
 class CPlayer;
 class CStaticMesh;
@@ -18,7 +19,7 @@ private:
 	CTerrain* m_pTerrain;	//地形
 	CSkyBox* m_pSkyBox;	//天空盒
 	CFrustum* m_pFrustum;//视锥体
-
+	CPlayer* m_pPlayer;	//玩家
 
 	D3DXMATRIX m_matLockedView;
 	public:

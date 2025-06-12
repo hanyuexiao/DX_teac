@@ -118,16 +118,18 @@ void CStaticMesh::Render()
 
 	D3DXMATRIX worldMatrix;
 	m_pNode->GetWorldTransform(worldMatrix);
-	if(m_bIsCulled)
-		return;
+	m_pAABB->Transform(worldMatrix);
+	m_pSelfBox->Transform(worldMatrix);
+	//if(m_bisCulled)
+	//	return;
 	m_pModelData->RenderMesh(worldMatrix);
 	if (m_pAABB) {
-		m_pAABB->Transform(worldMatrix);
+		
 		m_pAABB->RenderAABB();
 	}
 
 	if (m_pSelfBox && m_pSelfBox->m_bRenderAABB) {
-		m_pSelfBox->Transform(worldMatrix);
+		
 		m_pSelfBox->RenderBox();
 	}
 	
