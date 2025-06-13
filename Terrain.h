@@ -1,6 +1,7 @@
 #pragma once
 #include "myHead.h"
 #include "Object.h"
+#include "CFrustum.h"
 #define D3DFVF_TERRIANVERTEXFORAMT  D3DFVF_XYZ |D3DFVF_DIFFUSE | D3DFVF_TEX2
 struct TerrainVERTEX
 {
@@ -19,7 +20,7 @@ public:
 	//设备接口、			
 	HRESULT InitData();
 	void SetLength(float len) { m_fLen = len; }
-
+	void Update(CFrustum* pFrustum);
 	void Render();
 
 	LPD3DXMESH GetTerrainMesh() { return m_pTerrainMesh; }
@@ -28,6 +29,21 @@ public:
 
 	float GetHeight(float x, float y);
 
+	bool IsInFrustum(CFrustum* pFrustum,WORD index1,WORD index2,WORD index3)
+	{
+		D3DXVECTOR3 vecPoints[3];
+		vecPoints[0] = m_pTerrainVertex[index1].pos;
+		vecPoints[1] = m_pTerrainVertex[index2].pos;
+		vecPoints[2] = m_pTerrainVertex[index3].pos;
+
+		if (pFrustum->PointInFrustum(vecPoints[0]) ||
+			pFrustum->PointInFrustum(vecPoints[1]) ||
+			pFrustum->PointInFrustum(vecPoints[2]))
+		{
+			return true; //三角形的三个点都在视锥体内
+		}
+		return false;
+	}
 private:
 	TerrainVERTEX* m_pTerrainVertex;	//点
 	void* m_pIndexPalne;//WORD   DWORD

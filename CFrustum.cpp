@@ -26,13 +26,12 @@ bool CFrustum::PointInFrustum(const D3DXVECTOR3& point)
 }
 
 bool CFrustum::BoxInFrustum(const D3DXVECTOR3* arrayCorner) {
-	for (int i = 0; i < 8; i++)
+	for (int i = 0; i < 3; i++)
 	{
 		bool bInFrustum = true;
-		for (int j = 0; j < 3; j++)
+		for (int j = 0; j < 8; j++)
 		{
-			float distance = D3DXPlaneDotCoord(&m_Planes[j], &arrayCorner[i]);
-			if (distance < 10)
+			if (D3DXPlaneDotCoord(&m_Planes[i], &arrayCorner[j]) < 0.0f) 
 			{
 				bInFrustum = false;
 				break;

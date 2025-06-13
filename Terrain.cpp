@@ -115,7 +115,59 @@ HRESULT CTerrain::InitData()//(TSTRING colorName)
 
 	/////////////////////////////////////////////////////////////////////////
 
+	//m_pTerrainMesh->LockIndexBuffer(0, (void**)&m_pIndexPalne);
+	//if (m_iWidth * m_iHeight <= 65535)
+	//{
+	//	DWORD num = 0;
+	//	for (int i = 0; i < (m_iHeight - 1); i++)
+	//	{
+	//		for (int j = 0; j < (m_iWidth - 1); j++)
+	//		{
+	//			*((WORD*)m_pIndexPalne + num++) = j + m_iWidth * i;
+	//			*((WORD*)m_pIndexPalne + num++) = j + m_iWidth * (i + 1);
+	//			*((WORD*)m_pIndexPalne + num++) = j + 1 + m_iWidth * i;
+	//			*((WORD*)m_pIndexPalne + num++) = j + m_iWidth * (i + 1);
+	//			*((WORD*)m_pIndexPalne + num++) = j + m_iWidth * (i + 1) + 1;
+	//			*((WORD*)m_pIndexPalne + num++) = j + 1 + m_iWidth * i;  //short
+	//		}
+	//	}
+	//}
+	//else
+	//{
+	//	DWORD num = 0;
+	//	for (int i = 0; i < (m_iHeight - 1); i++)
+	//	{
+	//		for (int j = 0; j < (m_iWidth - 1); j++)
+	//		{
+	//			*((DWORD*)m_pIndexPalne + num++) = j + m_iWidth * i;
+	//			*((DWORD*)m_pIndexPalne + num++) = j + m_iWidth * (i + 1);
+	//			*((DWORD*)m_pIndexPalne + num++) = j + 1 + m_iWidth * i;
+	//			*((DWORD*)m_pIndexPalne + num++) = j + m_iWidth * (i + 1);
+	//			*((DWORD*)m_pIndexPalne + num++) = j + m_iWidth * (i + 1) + 1;
+	//			*((DWORD*)m_pIndexPalne + num++) = j + 1 + m_iWidth * i;
+	//		}
+	//	}
+	//}
+	//m_pTerrainMesh->UnlockIndexBuffer();
+
+	//定义三角形的不同属性值（分子集）
+	DWORD* attriBuffer;
+	m_pTerrainMesh->LockAttributeBuffer(0, &attriBuffer);
+	for (int i = 0; i < (m_iWidth - 1) * (m_iHeight - 1) * 2; i++)
+		attriBuffer[i] = 0;
+	m_pTerrainMesh->UnlockAttributeBuffer();
+
+
+	return S_OK;
+}
+
+void CTerrain::Update(CFrustum* pFrustum)
+{
+	m_nTriangles = 0;
 	m_pTerrainMesh->LockIndexBuffer(0, (void**)&m_pIndexPalne);
+
+	ZeroMemory(m_pIndexPalne, sizeof(WORD) * m_nTriangles * 3);
+
 	if (m_iWidth * m_iHeight <= 65535)
 	{
 		DWORD num = 0;
@@ -123,16 +175,28 @@ HRESULT CTerrain::InitData()//(TSTRING colorName)
 		{
 			for (int j = 0; j < (m_iWidth - 1); j++)
 			{
-				*((WORD*)m_pIndexPalne + num++) = j + m_iWidth * i;
-				*((WORD*)m_pIndexPalne + num++) = j + m_iWidth * (i + 1);
-				*((WORD*)m_pIndexPalne + num++) = j + 1 + m_iWidth * i;
-				*((WORD*)m_pIndexPalne + num++) = j + m_iWidth * (i + 1);
-				*((WORD*)m_pIndexPalne + num++) = j + m_iWidth * (i + 1) + 1;
-				*((WORD*)m_pIndexPalne + num++) = j + 1 + m_iWidth * i;  //short
+				if (IsInFrustum(pFrustum, j + m_iWidth * i, j + m_iWidth * (i + 1), j + 1 + m_iWidth * i))
+				{
+					*((WORD*)m_pIndexPalne + num++) = j + m_iWidth * i;
+					*((WORD*)m_pIndexPalne + num++) = j + m_iWidth * (i + 1);
+					*((WORD*)m_pIndexPalne + num++) = j + 1 + m_iWidth * i;
+
+					m_nTriangles++;
+				}
+				if (IsInFrustum(pFrustum, j + m_iWidth * (i + 1), j + m_iWidth * (i + 1) + 1, j + 1 + m_iWidth * i))
+				{
+					*((WORD*)m_pIndexPalne + num++) = j + m_iWidth * (i + 1);
+					*((WORD*)m_pIndexPalne + num++) = j + m_iWidth * (i + 1) + 1;
+					*((WORD*)m_pIndexPalne + num++) = j + 1 + m_iWidth * i;  //short
+
+					m_nTriangles++;
+				}
+			
 			}
 		}
 	}
-	else
+
+	/*else
 	{
 		DWORD num = 0;
 		for (int i = 0; i < (m_iHeight - 1); i++)
@@ -147,18 +211,8 @@ HRESULT CTerrain::InitData()//(TSTRING colorName)
 				*((DWORD*)m_pIndexPalne + num++) = j + 1 + m_iWidth * i;
 			}
 		}
-	}
+	}*/
 	m_pTerrainMesh->UnlockIndexBuffer();
-
-	//定义三角形的不同属性值（分子集）
-	DWORD* attriBuffer;
-	m_pTerrainMesh->LockAttributeBuffer(0, &attriBuffer);
-	for (int i = 0; i < (m_iWidth - 1) * (m_iHeight - 1) * 2; i++)
-		attriBuffer[i] = 0;
-	m_pTerrainMesh->UnlockAttributeBuffer();
-
-
-	return S_OK;
 }
 
 void CTerrain::Render()
@@ -188,6 +242,10 @@ void CTerrain::Render()
 	m_pTerrainMesh->DrawSubset(0);
 
 	m_pDev->SetTextureStageState(1, D3DTSS_COLOROP, D3DTOP_DISABLE);
+	TCHAR szInfo[64] = { 0 };
+	_stprintf_s(szInfo, _T("Triangles: %d"), m_nTriangles);
+	RECT rc = { 0, 0, 800, 100 };
+	CGraphic::GetSingleObjPtr()->DrawTextW(szInfo, rc);
 }
 
 

@@ -139,6 +139,11 @@ void CScene::Update(float fElapsedTime)
 	{
 		m_pFrustum->UpdateFrustum();
 	}
+
+	IsInFrustum();
+
+	//单独处理地形索引缓存的更新
+	m_pTerrain->Update(m_pFrustum);
 }
 
 void CScene::Render()

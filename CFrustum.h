@@ -34,7 +34,6 @@ class CFrustum
 
 	//定义视锥体裁剪时的3个平面
 	D3DXPLANE m_Planes[3];
-
 public:
 	//计算视锥体的3个平面
 	void MakeFrustumPlanes();

@@ -1,7 +1,7 @@
 #pragma once
 #include "myHead.h"
 #include "Player.h"
-
+#include "AxisAlignedBox.h"
 class CPlayer;
 class CStaticMesh;
 class CCameraManager;

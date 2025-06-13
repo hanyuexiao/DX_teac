@@ -9,6 +9,8 @@ CStaticMesh::CStaticMesh()
 	m_pModelData=nullptr;
 
 	m_pNode=new CNode;
+
+	m_bIsCulled = false;
 }
 
 CStaticMesh::~CStaticMesh()
@@ -120,8 +122,8 @@ void CStaticMesh::Render()
 	m_pNode->GetWorldTransform(worldMatrix);
 	m_pAABB->Transform(worldMatrix);
 	m_pSelfBox->Transform(worldMatrix);
-	//if(m_bisCulled)
-	//	return;
+	if(!m_bIsCulled)
+		return;
 	m_pModelData->RenderMesh(worldMatrix);
 	if (m_pAABB) {
 		

@@ -27,7 +27,7 @@ private:
 
 	CAxisAlignedBox* m_pSelfBox;
 
-	DECLARE_MEMBER(bool, m_bIsCulled, IsCulled);
+	DECLARE_MEMBER(bool, bIsCulled, IsCulled);
 
 	
 };
